@@ -74,7 +74,7 @@ Public Class JSQLSELECTParser
     Public Shared Function ParsePlain(ByVal JSQL As String) As String
         Dim rfs As New Regex("\s+")
 
-        JSQL = Strings.Trim(JSQL).Replace(vbCrLf, " ").ToUpper
+        JSQL = Strings.Trim(JSQL).Replace(vbCrLf, " ")
 
         Return rfs.Replace(JSQL, " ")
 
