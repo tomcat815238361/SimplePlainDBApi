@@ -1,4 +1,5 @@
 ﻿Imports System.Collections
+Imports System.Text
 Imports System.Text.RegularExpressions
 
 
@@ -76,7 +77,62 @@ Public Class JSQLSELECTParser
 
         JSQL = Strings.Trim(JSQL).Replace(vbCrLf, " ")
 
-        Return rfs.Replace(JSQL, " ")
+        JSQL = rfs.Replace(JSQL, " ")
+
+        Dim tJSQL = JSQL.ToUpper
+
+        Dim wi As Integer = Strings.InStr(tJSQL, JSQLWHERE)
+
+        Dim ji As Integer = Strings.InStr(tJSQL, JSQLJOIN)
+
+        Dim wStr As String
+        Dim whStr() As String
+
+        If tJSQL.Contains(JSQLWHERE) Then
+
+            If ji = 0 Then
+                wStr = Strings.Mid(JSQL, wi + JSQLWHERE.Length + 1)
+            Else
+                wStr = Strings.Mid(JSQL, wi + JSQLWHERE.Length + 1, ji - wi - JSQLJOIN.Length - 3)
+            End If
+
+            Dim re1 As Regex = New Regex("(AND)|(OR)")
+            whStr = re1.Split(wStr)
+
+            If whStr.Length = 0 Then
+                Throw New FormatException("WHERE MUST FORMAT COLUMN > VAL Or COLUMN <> VAL")
+            End If
+
+            Dim temp() As String
+
+            Dim sb As StringBuilder = New StringBuilder
+            sb.Append(" WHERE ")
+
+            Dim re2 As Regex = New Regex("(>)|(<)|(>=)|(<=)|(=)|(<>)|(Like)|(In)")
+            For Each c As String In whStr
+                If Trim(c) <> "AND" And Trim(c) <> "OR" Then
+                    temp = re2.Split(Trim(c）)
+                    If temp.Length <> 3 Then
+                        Throw New FormatException("WHERE MUST FORMAT CLOUMN >,<,=, <>,IN,LIKE) VALUE " + c)
+                    Else
+                        sb.Append(temp(0).ToUpper).Append(temp(1).ToUpper).Append(temp(2))
+                    End If
+                Else
+                    If Trim(c) = "AND" Or Trim(c) = "OR" Then
+                        sb.Append(" ").Append(c).Append(" ")
+                    End If
+                End If
+            Next
+
+            If ji = 0 Then
+                JSQL = tJSQL.Substring(0, wi - 1) + sb.ToString
+            Else
+                JSQL = tJSQL.Substring(0, wi - 1) + sb.ToString + " " + tJSQL.Substring(ji - 1)
+            End If
+            Return JSQL
+        End If
+
+        Return tJSQL
 
     End Function
 
@@ -154,20 +210,6 @@ Public Class JSQLSELECTParser
             Else
                 wStr = Strings.Mid(JSQL, wi + JSQLWHERE.Length + 1, ji - wi - JSQLJOIN.Length - 3)
             End If
-
-            Dim sp() As String = {" And ", " Or "}
-            whStr = wStr.Split(sp, StringSplitOptions.RemoveEmptyEntries)
-
-            If whStr.Length = 0 Then
-                Throw New FormatException("WHERE MUST FORMAT COLUMN > VAL Or COLUMN <> VAL")
-            End If
-
-            For Each c As String In whStr
-                temp = c.Split(" ")
-                If temp.Length <> 3 Then
-                    Throw New FormatException("WHERE MUST FORMAT CLOUMN >,<,=, <>,IN,LIKE) VALUE " + c)
-                End If
-            Next
 
         End If
 

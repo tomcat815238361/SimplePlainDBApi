@@ -6,6 +6,12 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
 <TestClass()> Public Class UnitTest
 
     <TestMethod()> Public Sub TestMethod()
+        'Dim dt As DataTable = jsa.QueryWithJSQL("from  Person  P select *")
+        'Dim dt As DataTable = jsa.QueryWithJSQL("from  Person  P select P.NAME,P.AGE")
+        JSQLSELECTParser.ParsePlain("from  Person  P select P.NAME NAME,P.AGE AGE WHERE NAME='jack' AND AGE>12 JOIN P")
+    End Sub
+
+    <TestMethod()> Public Sub TestParseJoinMethod()
         Dim jsa As JSQLApi = JSQLApi.CreateJSQLApi("F:\DB", DBType.TXT)
         'Dim dt As DataTable = jsa.QueryWithJSQL("from  Person  P select *")
         Dim dt As DataTable = jsa.QueryWithJSQL("from  Person  P select P.NAME,P.AGE")
